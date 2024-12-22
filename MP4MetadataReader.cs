@@ -1,7 +1,10 @@
 using System;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Collections.Generic;
+using System.IO;
 using MP4Reader.IO;
+using System.Linq;
 
 namespace Cromatix.MP4Reader
 {
@@ -67,12 +70,16 @@ namespace Cromatix.MP4Reader
             ReadMetadata();
         }
 
-        public void ProcessGPMFTelemetry()
+        public void ProcessGPMFTelemetry() => ProcessGPMFTelemetry(0);
+
+        public void ProcessGPMFTelemetry(int gpsFrequency)
         {
             int payloads = GetNumberOfPayloads;
             int gpsIndex = 0;
             bool hasGPS9Data = false;
             telemetry.KLVs = new List<KLV>();
+            telemetry.FileName = FileName;
+            telemetry.Description = "GoPro";
 
             for (int index = 0; index < payloads; index++)
             {
@@ -90,6 +97,11 @@ namespace Cromatix.MP4Reader
                     do
                     {
                         isNext = GetGPMF(gpmf);
+
+                        if (telemetry.DeviceName == null && gpmf.FourCC == "DVNM")
+                        {
+                            telemetry.DeviceName = gpmf.DeviceName;
+                        }
 
                         // GPS Precision - Dilution of Precision (DOP x100)
                         // https://en.wikipedia.org/wiki/Dilution_of_precision_(navigation)
@@ -176,8 +188,15 @@ namespace Cromatix.MP4Reader
                                         klv.GPSFix = "3d";
                                         break;
                                 }
-
-                                telemetry.KLVs.Add(klv);
+                                if (gpsFrequency > 0 && i % (int)(repeats/gpsFrequency) == 0)
+                                {
+                                    telemetry.KLVs.Add(klv);
+                                }
+                                else
+                                {
+                                    telemetry.KLVs.Add(klv);
+                                }
+                                
                             }
                         }
 
@@ -224,7 +243,19 @@ namespace Cromatix.MP4Reader
                                 klv.HDOP = DilutionOfPrecision;
                                 klv.GPSFix = GPSFix;
 
-                                telemetry.KLVs.Add(klv);
+                                if (gpsFrequency > 0 && i % (int)(repeats/gpsFrequency) == 0)
+                                {
+                                    telemetry.KLVs.Add(klv);
+                                }
+                                else
+                                {
+                                    telemetry.KLVs.Add(klv);
+                                }
+                                //if (i % (int)(repeats/gpsFrequency) == 0)
+                                //{
+                                //    telemetry.KLVs.Add(klv);
+                                //}
+                                //telemetry.KLVs.Add(klv);
                             }
                         }
                     }

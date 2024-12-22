@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using System.Xml;
+using System.IO;
 
 namespace Cromatix.MP4Reader
 {
@@ -47,8 +48,8 @@ namespace Cromatix.MP4Reader
         {
             XmlDocument xmlDoc = new XmlDocument();
 
-            string gpx = @"<?xml version=""1.0"" encoding=""UTF-8""?>" +
-                @$"<gpx xmlns=""http://www.topografix.com/GPX/1/1"" version=""1.0"">
+        string gpx = @"<?xml version=""1.0"" encoding=""UTF-8""?>" +
+            $@"<gpx xmlns=""http://www.topografix.com/GPX/1/1"" version=""1.0"">
                     <trk>
                         <trkseg>
                             {TelemetryToGPXString(telemetry)}
@@ -56,22 +57,43 @@ namespace Cromatix.MP4Reader
                     </trk>
                 </gpx>";
 
-            xmlDoc.LoadXml(gpx);
+        xmlDoc.LoadXml(gpx);
             return xmlDoc.Ident();
         }
 
-        private static string TelemetryToGPXString(Telemetry telemetry)
+    private static string TelemetryToGPXString(Telemetry telemetry)
         {
             StringBuilder sb = new StringBuilder();
 
             foreach (var klv in telemetry.KLVs)
             {
-                sb.AppendLine(@$"<trkpt lat=""{klv.Lat}"" lon=""{klv.Lon}"">
+                sb.AppendLine($@"<trkpt lat=""{klv.Lat}"" lon=""{klv.Lon}"">
                                     <ele>{klv.Alt}</ele>
                                     <time>{klv.Time.Value.ToString("yyyy-MM-ddTHH:mm:ss:fffZ")}</time>
                                     <fix>{klv.GPSFix}</fix>
                                     <hdop>{klv.HDOP}</hdop>
                                  </trkpt>");
+            }
+
+            return sb.ToString();
+        }
+
+        public static string ToCSV(Telemetry telemetry)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("Time_utc,Latitude,Longitude,Altitude,Speed_ms,Fix");
+            sb.Append(TelemetryToCSVString(telemetry));
+            return sb.ToString();
+        }
+
+        private static string TelemetryToCSVString(Telemetry telemetry)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            foreach (var klv in telemetry.KLVs)
+            {
+                var csv = 
+                sb.AppendLine($@"{klv.Time},{klv.Lat},{klv.Lon},{klv.Alt},{klv.GroundSpeed},{klv.GPSFix}");
             }
 
             return sb.ToString();
