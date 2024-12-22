@@ -77,7 +77,11 @@ namespace Cromatix.MP4Reader
         internal static uint BytesToInt(ReadOnlySpan<byte> array)
         {
             var byteSpan = array.Slice(0, 4);
+#if NET48_OR_GREATER
+            return BitConverter.ToUInt32(byteSpan.ToArray(), 0);
+#else
             return BitConverter.ToUInt32(byteSpan);
+#endif
         }
 
         internal static ushort BytesToShort(byte[] array, int startPos)
@@ -87,7 +91,12 @@ namespace Cromatix.MP4Reader
         internal static ushort BytesToShort(ReadOnlySpan<byte> array)
         {
             var byteSpan = array.Slice(0, 2);
+            //return BitConverter.ToUInt16(byteSpan);
+#if NET48_OR_GREATER
+            return BitConverter.ToUInt16(byteSpan.ToArray(), 0);
+#else
             return BitConverter.ToUInt16(byteSpan);
+#endif
         }
 
         internal static int HexToInt(uint num)
@@ -126,7 +135,12 @@ namespace Cromatix.MP4Reader
                 target = tmp;
             }
 
+#if NET48_OR_GREATER
+            var result = BitConverter.ToInt32(target.ToArray(), 0);
+#else
             var result = BitConverter.ToInt32(target);
+#endif
+            //var result = BitConverter.ToInt32(target);
             data = data.Slice(4);
             return result;
         }
@@ -141,8 +155,12 @@ namespace Cromatix.MP4Reader
                 tmp.Reverse();
                 target = tmp;
             }
-
+#if NET48_OR_GREATER
+            var result = BitConverter.ToInt16(target.ToArray(), 0);
+#else
             var result = BitConverter.ToInt16(target);
+#endif
+
             data = data.Slice(2);
             return result;
         }
