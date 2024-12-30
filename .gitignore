@@ -1,8 +1,7 @@
 
 .vs/
-
-obj/Debug/net6.0/
+/packages
 
 obj/
 
-bin/Debug/net6.0/
+bin/
