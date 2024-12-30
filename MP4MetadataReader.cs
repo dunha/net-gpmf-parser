@@ -194,7 +194,7 @@ namespace Cromatix.MP4Reader
                                 }
                                 else
                                 {
-                                    telemetry.KLVs.Add(klv);
+                                    //telemetry.KLVs.Add(klv);
                                 }
                                 
                             }
@@ -249,7 +249,7 @@ namespace Cromatix.MP4Reader
                                 }
                                 else
                                 {
-                                    telemetry.KLVs.Add(klv);
+                                    //telemetry.KLVs.Add(klv);
                                 }
                                 //if (i % (int)(repeats/gpsFrequency) == 0)
                                 //{
